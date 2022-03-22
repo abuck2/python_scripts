@@ -1,0 +1,2 @@
+# Pre-connection
+- Mac spoofing
